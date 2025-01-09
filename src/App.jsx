@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { Sidebar, Navbar } from './components';
 import { CampaignDetails, CreateCampaign, Home, Profile, Payment } from './pages';
-import PageNotFound from './components/PageNotFound';
+import PageNotFound from './pages/404';
 import ScreenLoader from './components/ScreenLoader';
 
 const DefaultLayout = ({ children }) => {
