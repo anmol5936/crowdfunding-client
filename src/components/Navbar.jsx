@@ -6,6 +6,7 @@ import { CustomButton } from './';
 import { logo, menu, thirdweb } from '../assets';
 import { navlinks } from '../constants';
 
+
 const Navbar = () => {
   const navigate = useNavigate();
   const [isActive, setIsActive] = useState('dashboard');
@@ -47,6 +48,23 @@ const Navbar = () => {
   const handleDisconnect = async () => {
     await disconnect();
     navigate('/');
+    };
+
+
+        const handleSearchResultClick = (campaign) => {
+        navigate(`/campaign-details/${campaign.pId}`, {
+          state: campaign // Pass the campaign data as state
+        });
+      };
+
+
+    const handleNavigateToCreate = () => {
+      if (address) {
+        // Use absolute path to ensure consistent navigation
+        navigate('/create-campaign');
+      } else {
+        connect();
+      }
     };
 
   const handleSearch = async () => {
@@ -148,7 +166,7 @@ const Navbar = () => {
 
         {/* Enhanced Filters */}
         {showFilters && (
-          <div className="absolute top-[60px] left-0 right-0 p-4 bg-[#1c1c24] rounded-[10px] shadow-lg z-10 border border-[#3a3a43]">
+          <div className="absolute top-[60px] left-0 right-0 p-4 bg-[#1c1c24] rounded-[10px] shadow-lg z-20 border border-[#3a3a43]">
             <div className="space-y-4">
               {/* Category Filter */}
               <div>
@@ -199,13 +217,13 @@ const Navbar = () => {
         )}
 
         {/* Search Results */}
-        {searchResults.length > 0 && (
+             {searchResults.length > 0 && (
           <div className="absolute top-[60px] left-0 right-0 bg-[#1c1c24] rounded-[10px] shadow-lg z-20 max-h-[400px] overflow-y-auto">
             {searchResults.map((campaign, index) => (
               <div
                 key={index}
                 className="p-4 hover:bg-[#2c2f32] cursor-pointer border-b border-[#3a3a43] last:border-b-0"
-                onClick={() => navigate(`/campaign-details/${campaign.pId}`)}
+                onClick={() => handleSearchResultClick(campaign)}
               >
                 <h3 className="text-white font-epilogue font-semibold">{campaign.title}</h3>
                 <p className="text-[#808191] text-sm mt-1">{campaign.description.substring(0, 100)}...</p>
@@ -235,20 +253,12 @@ const Navbar = () => {
         <CustomButton
           btnType="button"
           title={address ? 'Create a campaign' : 'Connect'}
-          styles={address ? 'bg-[#1dc071]' : 'bg-[#8c6dfd]'}
-          handleClick={() => {
-            if (address) navigate('create-campaign');
-            else connect();
-          }}
+          styles={address ? 'bg-gradient-to-r from-indigo-600 to-purple-600' : 'bg-[#8c6dfd]'}
+          handleClick={handleNavigateToCreate}
         />
 
         {address && (
           <div className="flex items-center gap-4">
-            <Link to="/profile">
-              <div className="w-[52px] h-[52px] rounded-full bg-[#2c2f32] flex justify-center items-center cursor-pointer hover:bg-[#3a3a43] transition-colors">
-                <img src={thirdweb} alt="user" className="w-[60%] h-[60%] object-contain" />
-              </div>
-            </Link>
             <button
               onClick={handleDisconnect}
               className="w-[52px] h-[52px] rounded-full bg-[#2c2f32] flex justify-center items-center cursor-pointer hover:bg-[#3a3a43] transition-colors"
@@ -312,10 +322,7 @@ const Navbar = () => {
               btnType="button"
               title={address ? 'Create a campaign' : 'Connect'}
               styles={address ? 'bg-[#1dc071]' : 'bg-[#8c6dfd]'}
-              handleClick={() => {
-                if (address) navigate('create-campaign');
-                else connect();
-              }}
+              handleClick={handleNavigateToCreate}
             />
             
             {address && (

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useStateContext } from '../context';
-import { Activity, Users, Target } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Activity, Users, Target, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 function App() {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [userCampaigns, setUserCampaigns] = useState([]);
   const [userDonations, setUserDonations] = useState([]);
@@ -19,6 +22,12 @@ function App() {
     getUserDonations,
     getCampaignStats 
   } = useStateContext();
+
+  const { user } = useAuth();
+
+  const handleCampaignClick = (campaign) => {
+    navigate(`/campaign-details/${campaign.pId}`, { state: campaign });
+  };
 
   const fetchUserData = async () => {
     try {
@@ -39,9 +48,9 @@ function App() {
         totalDonations: donations.length,
         activeCampaigns: activeCampaignsCount
       });
-      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching user data:", error);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -55,39 +64,69 @@ function App() {
   if (!address) {
     return (
       <div className="min-h-screen bg-[#13131a] flex items-center justify-center font-epilogue">
-        <p className="text-lg text-white">Please connect your wallet to view your profile.</p>
+        <div className="bg-gradient-to-r from-indigo-600/10 to-purple-600/10 p-8 rounded-lg max-w-md w-full text-center">
+          <User className="w-16 h-16 text-indigo-400 mx-auto mb-4" />
+          <p className="text-lg text-white">Please connect your wallet to view your profile.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#13131a] p-4 sm:p-8 font-epilogue">
+    <div className="min-h-screen p-4 sm:p-8 font-epilogue">
       <div className="max-w-6xl mx-auto">
-        {/* Profile Header */}
-        <div className="bg-[#1c1c24] rounded-[15px] p-4 sm:p-6 mb-8">
-          <h1 className="text-2xl font-epilogue font-semibold text-white mb-6">Profile Dashboard</h1>
+        {/* User Profile Info */}
+        <div className="bg-gradient-to-r from-indigo-600/10 to-purple-600/10 rounded-[15px] p-4 sm:p-6 mb-8">
+          <div className="flex flex-col sm:flex-row items-center gap-6 mb-6">
+            <div className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-600/50 to-purple-600/50 rounded-full blur opacity-50 group-hover:opacity-75 transition duration-1000"></div>
+              {user?.photoURL ? (
+                <img 
+                  src={user.photoURL} 
+                  alt="Profile" 
+                  className="w-24 h-24 rounded-full relative border-2 border-white/10"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-white/5 backdrop-blur-sm flex items-center justify-center relative">
+                  <User className="w-12 h-12 text-indigo-400" />
+                </div>
+              )}
+            </div>
+            <div className="text-center sm:text-left">
+              <h1 className="text-2xl font-epilogue font-semibold text-white mb-2">
+                {user?.displayName || 'Anonymous User'}
+              </h1>
+              {user?.email && (
+                <p className="text-[#808191] mb-2">{user.email}</p>
+              )}
+              <p className="text-[#808191] font-mono">
+                Wallet: {address.slice(0, 6)}...{address.slice(-4)}
+              </p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-[#2c2f32] rounded-[10px] p-4 flex items-center">
-              <div className="w-[40px] h-[40px] rounded-[10px] flex justify-center items-center bg-[#1c1c24]">
-                <Target className="w-1/2 h-1/2 text-[#808191]" />
+            <div className="bg-white/5 backdrop-blur-sm rounded-[10px] p-4 flex items-center">
+              <div className="w-[40px] h-[40px] rounded-[10px] flex justify-center items-center bg-indigo-600/20">
+                <Target className="w-1/2 h-1/2 text-indigo-400" />
               </div>
               <div className="ml-4">
                 <p className="font-epilogue font-normal text-[#808191] text-sm">Total Campaigns</p>
                 <p className="font-epilogue font-semibold text-white text-xl">{stats.totalCampaigns}</p>
               </div>
             </div>
-            <div className="bg-[#2c2f32] rounded-[10px] p-4 flex items-center">
-              <div className="w-[40px] h-[40px] rounded-[10px] flex justify-center items-center bg-[#1c1c24]">
-                <Activity className="w-1/2 h-1/2 text-[#808191]" />
+            <div className="bg-white/5 backdrop-blur-sm rounded-[10px] p-4 flex items-center">
+              <div className="w-[40px] h-[40px] rounded-[10px] flex justify-center items-center bg-indigo-600/20">
+                <Activity className="w-1/2 h-1/2 text-indigo-400" />
               </div>
               <div className="ml-4">
                 <p className="font-epilogue font-normal text-[#808191] text-sm">Active Campaigns</p>
                 <p className="font-epilogue font-semibold text-white text-xl">{stats.activeCampaigns}</p>
               </div>
             </div>
-            <div className="bg-[#2c2f32] rounded-[10px] p-4 flex items-center">
-              <div className="w-[40px] h-[40px] rounded-[10px] flex justify-center items-center bg-[#1c1c24]">
-                <Users className="w-1/2 h-1/2 text-[#808191]" />
+            <div className="bg-white/5 backdrop-blur-sm rounded-[10px] p-4 flex items-center">
+              <div className="w-[40px] h-[40px] rounded-[10px] flex justify-center items-center bg-indigo-600/20">
+                <Users className="w-1/2 h-1/2 text-indigo-400" />
               </div>
               <div className="ml-4">
                 <p className="font-epilogue font-normal text-[#808191] text-sm">Campaigns Supported</p>
@@ -98,14 +137,23 @@ function App() {
         </div>
 
         {/* User's Campaigns */}
-        <div className="bg-[#1c1c24] rounded-[15px] p-4 sm:p-6 mb-8">
+        <div className="bg-gradient-to-r from-indigo-600/10 to-purple-600/10 rounded-[15px] p-4 sm:p-6 mb-8">
           <h2 className="text-xl font-epilogue font-semibold text-white mb-6">Your Campaigns</h2>
           {isLoading ? (
             <p className="text-[#808191]">Loading campaigns...</p>
           ) : userCampaigns.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {userCampaigns.map((campaign, i) => (
-                <div key={i} className="bg-[#2c2f32] rounded-[15px] overflow-hidden">
+                <div 
+                  key={i} 
+                  className="bg-white/5 backdrop-blur-sm rounded-[15px] overflow-hidden cursor-pointer transform transition-transform hover:scale-[1.02]"
+                  onClick={() => handleCampaignClick(campaign)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') handleCampaignClick(campaign);
+                  }}
+                >
                   <img 
                     src={campaign.image} 
                     alt={campaign.title}
@@ -128,9 +176,9 @@ function App() {
                         <p className="font-epilogue font-normal text-[#808191] text-sm">Ends on</p>
                         <p className="font-epilogue font-semibold text-white text-sm">{campaign.deadline}</p>
                       </div>
-                      <div className="mt-2 px-3 py-1 bg-[#1c1c24] rounded-[5px] w-fit">
+                      <div className="mt-2 px-3 py-1 bg-white/5 backdrop-blur-sm rounded-[5px] w-fit">
                         <p className="font-epilogue font-normal text-[#808191] text-sm">
-                          Status: <span className={`text-${campaign.isActive ? '[#4acd8d]' : 'red-500'}`}>
+                          Status: <span className={`text-${campaign.isActive ? 'indigo-400' : 'red-500'}`}>
                             {campaign.isActive ? 'Active' : 'Closed'}
                           </span>
                         </p>
@@ -146,14 +194,23 @@ function App() {
         </div>
 
         {/* User's Donations */}
-        <div className="bg-[#1c1c24] rounded-[15px] p-4 sm:p-6">
+        <div className="bg-gradient-to-r from-indigo-600/10 to-purple-600/10 rounded-[15px] p-4 sm:p-6">
           <h2 className="text-xl font-epilogue font-semibold text-white mb-6">Your Donations</h2>
           {isLoading ? (
             <p className="text-[#808191]">Loading donations...</p>
           ) : userDonations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {userDonations.map((donation, i) => (
-                <div key={i} className="bg-[#2c2f32] rounded-[15px] overflow-hidden">
+                <div 
+                  key={i} 
+                  className="bg-white/5 backdrop-blur-sm rounded-[15px] overflow-hidden cursor-pointer transform transition-transform hover:scale-[1.02]"
+                  onClick={() => handleCampaignClick(donation)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') handleCampaignClick(donation);
+                  }}
+                >
                   <img 
                     src={donation.image} 
                     alt={donation.title}
@@ -169,9 +226,9 @@ function App() {
                             {donation.owner.slice(0, 6)}...{donation.owner.slice(-4)}
                           </p>
                         </div>
-                        <div className="w-full bg-[#1c1c24] rounded-[10px] mt-2">
+                        <div className="w-full bg-white/5 backdrop-blur-sm rounded-[10px] mt-2">
                           <div 
-                            className="bg-[#4acd8d] h-2 rounded-[10px]" 
+                            className="bg-gradient-to-r from-indigo-600 to-purple-600 h-2 rounded-[10px]" 
                             style={{ 
                               width: `${Math.min(((Number(donation.amountCollected) / Number(donation.target)) * 100), 100)}%`
                             }}

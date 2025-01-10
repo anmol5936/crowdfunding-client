@@ -160,25 +160,36 @@ const Payment = () => {
     }
   };
 
+  if (!address) {
+    return (
+      <div className="min-h-screen  flex items-center justify-center p-4">
+        <div className="bg-gradient-to-r from-indigo-600/10 to-purple-600/10 p-8 rounded-lg max-w-md w-full text-center">
+          <AlertCircle className="w-16 h-16 text-indigo-400 mx-auto mb-4" />
+          <p className="text-white font-epilogue text-lg mb-4">Please connect your wallet to view payment details</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#13131a] p-4">
+    <div className="min-h-screen p-4">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-white font-epilogue font-semibold text-[18px] mb-8">Payment Dashboard</h1>
         
         {/* Wallet Overview */}
-        <div className="bg-[#1c1c24] rounded-[15px] p-6 mb-8">
+        <div className="bg-gradient-to-r from-indigo-600/10 to-purple-600/10 rounded-[15px] p-6 mb-8">
           <div className="flex items-center gap-4 mb-6">
-            <Wallet className="w-8 h-8 text-[#4acd8d]" />
+            <Wallet className="w-8 h-8 text-indigo-400" />
             <h2 className="text-white font-epilogue font-semibold text-[16px]">Wallet Overview</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-[#2c2f32] rounded-[10px] p-6">
+            <div className="bg-white/5 backdrop-blur-sm rounded-[10px] p-6">
               <p className="text-[#808191] font-epilogue text-sm mb-2">Current Balance</p>
               <p className="text-white font-epilogue font-semibold text-2xl">{balance} ETH</p>
             </div>
             
-            <div className="bg-[#2c2f32] rounded-[10px] p-6">
+            <div className="bg-white/5 backdrop-blur-sm rounded-[10px] p-6">
               <p className="text-[#808191] font-epilogue text-sm mb-2">Wallet Address</p>
               <p className="text-white font-epilogue font-medium text-sm break-all">
                 {address}
@@ -188,14 +199,14 @@ const Payment = () => {
         </div>
 
         {/* Recent Transactions */}
-        <div className="bg-[#1c1c24] rounded-[15px] p-6">
+        <div className="bg-gradient-to-r from-indigo-600/10 to-purple-600/10 rounded-[15px] p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-white font-epilogue font-semibold text-[16px]">
               {showAllTransactions ? 'All Transactions' : 'Recent Transactions'}
             </h2>
             <button 
               onClick={() => setShowAllTransactions(!showAllTransactions)}
-              className="text-[#4acd8d] font-epilogue text-sm flex items-center gap-2 hover:opacity-80 transition-opacity"
+              className="text-indigo-400 font-epilogue text-sm flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               {showAllTransactions ? 'Show Less' : 'View All'} <ArrowRight className="w-4 h-4" />
             </button>
@@ -204,13 +215,13 @@ const Payment = () => {
           {loading ? (
             <p className="text-[#808191] font-epilogue text-center py-4">Loading transactions...</p>
           ) : displayedTransactions.length === 0 ? (
-            <div className="bg-[#2c2f32] rounded-[10px] p-4">
+            <div className="bg-white/5 backdrop-blur-sm rounded-[10px] p-4">
               <p className="text-[#808191] font-epilogue text-sm">No recent transactions</p>
             </div>
           ) : (
             <div className="space-y-4">
               {displayedTransactions.map((tx, index) => (
-                <div key={index} className="bg-[#2c2f32] rounded-[10px] p-4">
+                <div key={index} className="bg-white/5 backdrop-blur-sm rounded-[10px] p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       {getTransactionIcon(tx.type)}
