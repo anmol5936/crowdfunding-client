@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 import { useStateContext } from '../context';
 import { money } from '../assets';
 import { CustomButton, FormField, Loader } from '../components';
-import { checkIfImage } from '../utils';
+import { uploadToPinata } from '../utils/pinata';
 
 const CreateCampaign = () => {
   const navigate = useNavigate();
@@ -22,34 +22,43 @@ const CreateCampaign = () => {
     category: 'General'
   });
 
+  const [selectedFile, setSelectedFile] = useState(null);
+
   const handleFormFieldChange = (fieldName, e) => {
     setForm({ ...form, [fieldName]: e.target.value })
   }
 
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    checkIfImage(form.image, async (exists) => {
-      if(exists) {
-        setIsLoading(true);
-        try {
-          await publishCampaign({ 
-            ...form,
-            target: form.target,
-            minimumContribution: form.minimumContribution
-          });
-          navigate('/dashboard');
-        } catch (error) {
-          console.error('Error during campaign creation:', error);
-          alert('Failed to create campaign. Please try again.');
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        alert('Provide valid image URL');
-        setForm({ ...form, image: '' });
+    try {
+      let imageUrl = form.image;
+      
+      if (selectedFile) {
+        imageUrl = await uploadToPinata(selectedFile);
       }
-    });
+
+      await publishCampaign({ 
+        ...form,
+        image: imageUrl,
+        target: form.target,
+        minimumContribution: form.minimumContribution
+      });
+      
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error during campaign creation:', error);
+      alert('Failed to create campaign. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const categories = [
@@ -67,7 +76,6 @@ const CreateCampaign = () => {
 
   return (
     <div className="relative">
-      {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute w-96 h-96 -top-48 -left-48 bg-purple-500/5 rounded-full " />
         <div className="absolute w-96 h-96 -bottom-48 -right-48 bg-pink-500/5 rounded-full " />
@@ -77,7 +85,7 @@ const CreateCampaign = () => {
         {isLoading && <Loader />}
         
         <div className="relative group w-full">
-          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl   transition-all duration-300" />
+          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl transition-all duration-300" />
           <div className="relative flex justify-center items-center p-6 sm:min-w-[380px] bg-[#1e1e27] rounded-xl border border-purple-500/10">
             <h1 className="font-epilogue font-bold sm:text-[25px] text-[18px] leading-[38px] text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
               Start a Campaign
@@ -112,7 +120,7 @@ const CreateCampaign = () => {
           />
 
           <div className="relative group w-full">
-            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl  transition-all duration-300" />
+            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl transition-all duration-300" />
             <div className="relative w-full flex justify-start items-center p-6 bg-[#1e1e27] rounded-xl border border-purple-500/10">
               <img src={money} alt="money" className="w-[40px] h-[40px] object-contain"/>
               <h4 className="font-epilogue font-bold text-[25px] text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 ml-[20px]">
@@ -166,10 +174,11 @@ const CreateCampaign = () => {
 
           <FormField 
             labelName="Campaign image *"
-            placeholder="Place image URL of your campaign"
-            inputType="url"
-            value={form.image}
-            handleChange={(e) => handleFormFieldChange('image', e)}
+            placeholder="Upload campaign image"
+            inputType="file"
+            value=""
+            handleChange={() => {}}
+            handleFileChange={handleFileChange}
           />
 
           <div className="flex justify-center items-center mt-8">
@@ -185,7 +194,7 @@ const CreateCampaign = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default CreateCampaign;
